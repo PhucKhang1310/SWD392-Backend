@@ -1,2 +1,2 @@
-# SW392-Backend
-Repository for FPTU's 8th semester subject SWD392
+# SW3D92-Backend
+Repository for FPTU's 7th semester subject SWD392
