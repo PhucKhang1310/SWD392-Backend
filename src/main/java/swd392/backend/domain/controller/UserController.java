@@ -7,8 +7,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import swd392.backend.domain.dto.UserDTO;
 import swd392.backend.domain.service.user.UserService;
-import swd392.backend.jpa.model.User;
-import swd392.backend.jpa.repository.UserRepository;
 
 import java.util.List;
 
