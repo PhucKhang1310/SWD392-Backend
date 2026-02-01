@@ -19,6 +19,11 @@ public class ProductController {
         return productService.getAllProducts();
     }
 
+    @PostMapping
+    public ProductDTO createProduct(@RequestBody ProductDTO productDTO) {
+        return productService.createProduct(productDTO);
+    }
+
     @DeleteMapping
     public void deleteProductById(long id) {
         productService.deleteProduct(id);

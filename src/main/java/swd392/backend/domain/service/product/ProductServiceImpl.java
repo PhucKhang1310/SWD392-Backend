@@ -26,17 +26,18 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public Product findProductById(Long id) {
-        return productRepository.findById(id).get();
+    public ProductDTO findProductById(Long id) {
+        return productMapper.toDto(productRepository.findById(id).get());
     }
 
     @Override
-    public Product createProduct(Product product) {
-        return null;
+    public ProductDTO createProduct(ProductDTO productDTO) {
+        Product product = productMapper.toEntity(productDTO);
+        return productMapper.toDto(productRepository.save(product));
     }
 
     @Override
-    public Product updateProduct(Long id, Product product) {
+    public ProductDTO updateProduct(ProductDTO productDTO) {
         return null;
     }
 
