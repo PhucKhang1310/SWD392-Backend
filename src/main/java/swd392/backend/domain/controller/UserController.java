@@ -2,9 +2,7 @@ package swd392.backend.domain.controller;
 
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import swd392.backend.domain.dto.UserDTO;
 import swd392.backend.domain.service.user.UserService;
 
@@ -21,8 +19,8 @@ public class UserController {
         return userService.findAllUsers();
     }
 
-    @GetMapping
-    public UserDTO findUserById(Long id) {
+    @GetMapping("/{id}")
+    public UserDTO findUserById(@PathVariable Long id) {
         return userService.findUserById(id);
     }
 }
