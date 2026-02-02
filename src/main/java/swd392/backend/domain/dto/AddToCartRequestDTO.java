@@ -5,17 +5,12 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.FieldDefaults;
 
-import java.math.BigDecimal;
-
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level = lombok.AccessLevel.PRIVATE)
-public class ProductDTO {
-    Integer id;
-    String name;
-    String description;
-    BigDecimal price;
-    Integer stockQuantity;
-    String status;
+public class AddToCartRequestDTO {
+    Integer userId;
+    Integer productId;
+    Integer quantity;
 }
