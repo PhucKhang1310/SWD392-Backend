@@ -6,7 +6,7 @@ import swd392.backend.jpa.model.Product;
 import java.util.List;
 import java.util.Optional;
 
-public interface ProductRepository extends JpaRepository<Product, Long> {
+public interface ProductRepository extends JpaRepository<Product, Integer> {
     Optional<Product> findByName(String name);
-    Optional<Product> findById(long id);
+    Optional<Product> findById(Integer id);
 }
