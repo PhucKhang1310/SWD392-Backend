@@ -6,5 +6,5 @@ import java.util.List;
 
 public interface UserService {
     List<UserDTO> findAllUsers();
-    UserDTO findUserById(Long id);
+    UserDTO findUserById(Integer id);
 }

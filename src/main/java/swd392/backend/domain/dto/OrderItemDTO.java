@@ -11,11 +11,11 @@ import java.math.BigDecimal;
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level = lombok.AccessLevel.PRIVATE)
-public class ProductDTO {
+public class OrderItemDTO {
     Integer id;
-    String name;
-    String description;
+    Integer orderId;
+    Integer productId;
+    String productName;
+    Integer quantity;
     BigDecimal price;
-    Integer stockQuantity;
-    String status;
 }

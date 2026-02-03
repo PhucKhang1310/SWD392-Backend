@@ -1,42 +1,35 @@
 package swd392.backend.momo.shared.utils;
 
-import org.apache.log4j.BasicConfigurator;
-import org.apache.log4j.PropertyConfigurator;
-import org.apache.log4j.Logger;
-
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /***
  * @author uyen.tran
  */
 public class LogUtils {
-     static Logger logger;
+    private static final Logger logger = LoggerFactory.getLogger(LogUtils.class);
 
-    public static void init(){
-        logger = Logger.getLogger(LogUtils.class);
-        BasicConfigurator.configure();
+    public static void init() {
+        // No explicit initialization needed for Logback - it auto-configures
     }
 
-    public static void info(String serviceCode, Object object){
-        logger.info(new StringBuilder().append("[").append(serviceCode).append("]: ").append(object));
-    }
-    public static void info(Object object){
-        logger.info(object);
+    public static void info(String serviceCode, Object object) {
+        logger.info("[{}]: {}", serviceCode, object);
     }
 
-    public static void debug(Object object){
-        logger.debug(object);
+    public static void info(Object object) {
+        logger.info("{}", object);
     }
 
-    public static void error(Object object){
-        logger.error(object);
+    public static void debug(Object object) {
+        logger.debug("{}", object);
     }
 
-//    public static void error(Object object) {
-//        logger.error(object);
-//    }
+    public static void error(Object object) {
+        logger.error("{}", object);
+    }
 
-    public static void warn(Object object){
-        logger.warn(object);
+    public static void warn(Object object) {
+        logger.warn("{}", object);
     }
 }

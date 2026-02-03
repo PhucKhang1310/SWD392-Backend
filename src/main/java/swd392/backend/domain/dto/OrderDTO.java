@@ -6,16 +6,19 @@ import lombok.NoArgsConstructor;
 import lombok.experimental.FieldDefaults;
 
 import java.math.BigDecimal;
+import java.time.Instant;
+import java.util.List;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level = lombok.AccessLevel.PRIVATE)
-public class ProductDTO {
+public class OrderDTO {
     Integer id;
-    String name;
-    String description;
-    BigDecimal price;
-    Integer stockQuantity;
+    Integer buyerId;
+    String buyerName;
+    Instant orderDate;
     String status;
+    BigDecimal totalAmount;
+    List<OrderItemDTO> orderItems;
 }
