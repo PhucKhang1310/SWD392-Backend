@@ -42,6 +42,7 @@ jobs:
                   username: ${{ secrets.SSH_USER }}
                   key: ${{ secrets.SSH_PRIVATE_KEY }}
                   script: |
+                      echo ${{ secrets.GHCR_PAT }} | docker login ghcr.io -u taiduc1001 --password-stdin
                       cd /srv/swd392-backend
                       docker compose pull
                       docker compose up -d
