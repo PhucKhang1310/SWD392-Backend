@@ -42,7 +42,7 @@ jobs:
                   username: ${{ secrets.SSH_USER }}
                   key: ${{ secrets.SSH_PRIVATE_KEY }}
                   source: "docker-compose.server.yml"
-                  target: "/srv/swd392-backend/"
+                  target: "~/swd392-backend/"
 
             - name: Deploy on server
               uses: appleboy/ssh-action@v1.0.3
@@ -52,6 +52,6 @@ jobs:
                   key: ${{ secrets.SSH_PRIVATE_KEY }}
                   script: |
                       echo ${{ secrets.GHCR_PAT }} | docker login ghcr.io -u taiduc1001 --password-stdin
-                      cd /srv/swd392-backend
+                      cd ~/swd392-backend
                       docker compose -f docker-compose.server.yml pull
                       docker compose -f docker-compose.server.yml up -d
