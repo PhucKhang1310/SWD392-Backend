@@ -35,6 +35,15 @@ jobs:
               with:
                   authkey: ${{ secrets.TAILSCALE_AUTHKEY }}
 
+            - name: Copy compose file to server
+              uses: appleboy/scp-action@v0.1.7
+              with:
+                  host: ${{ secrets.SSH_HOST }}
+                  username: ${{ secrets.SSH_USER }}
+                  key: ${{ secrets.SSH_PRIVATE_KEY }}
+                  source: "docker-compose.server.yml"
+                  target: "/srv/swd392-backend/"
+
             - name: Deploy on server
               uses: appleboy/ssh-action@v1.0.3
               with:
@@ -44,5 +53,5 @@ jobs:
                   script: |
                       echo ${{ secrets.GHCR_PAT }} | docker login ghcr.io -u taiduc1001 --password-stdin
                       cd /srv/swd392-backend
-                      docker compose pull
-                      docker compose up -d
+                      docker compose -f docker-compose.server.yml pull
+                      docker compose -f docker-compose.server.yml up -d
