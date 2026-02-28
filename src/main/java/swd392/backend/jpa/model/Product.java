@@ -45,4 +45,13 @@ public class Product {
     @Column(name = "status", length = 50)
     private String status;
 
+    @Size(max = 2048)
+    @Column(name = "img_url", length = 2048)
+    private String imgUrl;
+
+    @Size(max = 100)
+    @Nationalized
+    @Column(name = "category", length = 100)
+    private String category;
+
 }
