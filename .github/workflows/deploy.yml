@@ -1,0 +1,57 @@
+name: CI/CD
+
+on:
+    push:
+        branches:
+            - main
+            - cicd-test
+
+jobs:
+    deploy:
+        runs-on: ubuntu-latest
+
+        permissions:
+            contents: read
+            packages: write
+
+        steps:
+            - uses: actions/checkout@v4
+
+            - name: Login to GHCR
+              uses: docker/login-action@v3
+              with:
+                  registry: ghcr.io
+                  username: taiduc1001
+                  password: ${{ secrets.GHCR_PAT }}
+
+            - name: Build & Push image
+              uses: docker/build-push-action@v5
+              with:
+                  push: true
+                  tags: ghcr.io/taiduc1001/swd392-backend:latest
+
+            - name: Connect to Tailscale
+              uses: tailscale/github-action@v2
+              with:
+                  authkey: ${{ secrets.TAILSCALE_AUTHKEY }}
+
+            - name: Copy compose file to server
+              uses: appleboy/scp-action@v0.1.7
+              with:
+                  host: ${{ secrets.SSH_HOST }}
+                  username: ${{ secrets.SSH_USER }}
+                  key: ${{ secrets.SSH_PRIVATE_KEY }}
+                  source: "docker-compose.server.yml"
+                  target: "~/swd392-backend/"
+
+            - name: Deploy on server
+              uses: appleboy/ssh-action@v1.0.3
+              with:
+                  host: ${{ secrets.SSH_HOST }}
+                  username: ${{ secrets.SSH_USER }}
+                  key: ${{ secrets.SSH_PRIVATE_KEY }}
+                  script: |
+                      echo ${{ secrets.GHCR_PAT }} | docker login ghcr.io -u taiduc1001 --password-stdin
+                      cd ~/swd392-backend
+                      docker compose -f docker-compose.server.yml pull
+                      docker compose -f docker-compose.server.yml up -d
