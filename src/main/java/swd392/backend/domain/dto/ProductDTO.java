@@ -18,4 +18,6 @@ public class ProductDTO {
     BigDecimal price;
     Integer stockQuantity;
     String status;
+    String imgUrl;
+    String category;
 }
