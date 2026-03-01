@@ -6,5 +6,10 @@ import java.util.List;
 
 public interface UserService {
     List<UserDTO> findAllUsers();
+
     UserDTO findUserById(Integer id);
+
+    UserDTO updateUserRole(Integer userId, String role);
+
+    UserDTO updateUser(UserDTO userDTO);
 }

@@ -85,6 +85,26 @@ public class MinioStorageService implements StorageService {
     }
 
     @Override
+    public InputStream getFile(String objectName, String folder) throws Exception {
+        if (!folder.isEmpty() && !objectName.startsWith(folder + "/")) {
+            objectName = folder + "/" + objectName;
+        }
+
+        try {
+            InputStream stream = minioClient.getObject(
+                    GetObjectArgs.builder()
+                            .bucket(bucketName)
+                            .object(objectName)
+                            .build());
+            log.info("File retrieved successfully: {}", objectName);
+            return stream;
+        } catch (Exception e) {
+            log.error("Error getting file from MinIO: {}", objectName, e);
+            throw new RuntimeException("Error getting file from MinIO: " + objectName, e);
+        }
+    }
+
+    @Override
     public void deleteFile(String objectName, String folder) throws Exception {
         if (!folder.isEmpty() && !objectName.startsWith(folder + "/")) {
             objectName = folder + "/" + objectName;

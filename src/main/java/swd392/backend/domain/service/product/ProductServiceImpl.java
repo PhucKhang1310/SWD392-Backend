@@ -33,7 +33,8 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public ProductDTO createProduct(ProductDTO productDTO) {
         Product product = productMapper.toEntity(productDTO);
-        return productMapper.toDto(productRepository.save(product));
+        Product savedProduct = productRepository.save(product);
+        return productMapper.toDto(savedProduct);
     }
 
     @Override
@@ -46,6 +47,12 @@ public class ProductServiceImpl implements ProductService {
         existingProduct.setPrice(productDTO.getPrice());
         existingProduct.setStockQuantity(productDTO.getStockQuantity());
         existingProduct.setStatus(productDTO.getStatus());
+        existingProduct.setCategory(productDTO.getCategory());
+
+        // Only update imgUrl if it's provided and is not a presigned URL
+        if (productDTO.getImgUrl() != null && !productDTO.getImgUrl().isEmpty()) {
+            existingProduct.setImgUrl(productDTO.getImgUrl());
+        }
 
         Product updatedProduct = productRepository.save(existingProduct);
         return productMapper.toDto(updatedProduct);
