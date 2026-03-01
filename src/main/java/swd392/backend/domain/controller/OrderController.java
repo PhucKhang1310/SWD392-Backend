@@ -3,10 +3,9 @@ package swd392.backend.domain.controller;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import swd392.backend.domain.dto.CreateOrderRequestDTO;
-import swd392.backend.domain.dto.OrderDTO;
-import swd392.backend.domain.dto.OrderItemDTO;
+import swd392.backend.domain.dto.*;
 import swd392.backend.domain.service.order.OrderService;
+import swd392.backend.domain.service.payment.PaymentService;
 
 import java.util.List;
 
@@ -15,6 +14,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class OrderController {
     private final OrderService orderService;
+    private final PaymentService paymentService;
 
     @GetMapping
     public List<OrderDTO> getAllOrders() {
@@ -68,6 +68,28 @@ public class OrderController {
             return ResponseEntity.ok().build();
         } catch (RuntimeException e) {
             return ResponseEntity.notFound().build();
+        }
+    }
+
+    @PostMapping("/{orderId}/checkout")
+    public ResponseEntity<CheckoutResponseDTO> checkout(@PathVariable Integer orderId,
+            @RequestBody CheckoutRequestDTO request) {
+        try {
+            CheckoutResponseDTO response = paymentService.createCheckout(orderId, request.getReturnUrl(),
+                    request.getNotifyUrl());
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().build();
+        }
+    }
+
+    @PostMapping("/momo/callback")
+    public ResponseEntity<String> momoCallback(@RequestBody MoMoCallbackDTO callback) {
+        try {
+            paymentService.handleMoMoCallback(callback);
+            return ResponseEntity.ok("Success");
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Failed: " + e.getMessage());
         }
     }
 }
