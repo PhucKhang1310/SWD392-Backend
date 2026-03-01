@@ -12,6 +12,9 @@ services:
     depends_on:
       sqlserver:
         condition: service_healthy
+    dns:
+      - 8.8.8.8
+      - 1.1.1.1
     restart: unless-stopped
 
   sqlserver:
