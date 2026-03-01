@@ -6,7 +6,6 @@ import lombok.experimental.FieldDefaults;
 import org.springframework.stereotype.Service;
 import swd392.backend.domain.dto.ProductDTO;
 import swd392.backend.domain.mapper.ProductMapper;
-import swd392.backend.domain.service.storage.StorageService;
 import swd392.backend.jpa.model.Product;
 import swd392.backend.jpa.repository.ProductRepository;
 
@@ -18,27 +17,24 @@ import java.util.List;
 public class ProductServiceImpl implements ProductService {
     ProductRepository productRepository;
     ProductMapper productMapper;
-    StorageService storageService;
 
     @Override
     public List<ProductDTO> getAllProducts() {
         return productRepository.findAll().stream()
                 .map(productMapper::toDto)
-                .map(this::convertImageUrlToPresigned)
                 .toList();
     }
 
     @Override
     public ProductDTO findProductById(Integer id) {
-        ProductDTO productDTO = productMapper.toDto(productRepository.findById(id).get());
-        return convertImageUrlToPresigned(productDTO);
+        return productMapper.toDto(productRepository.findById(id).get());
     }
 
     @Override
     public ProductDTO createProduct(ProductDTO productDTO) {
         Product product = productMapper.toEntity(productDTO);
         Product savedProduct = productRepository.save(product);
-        return convertImageUrlToPresigned(productMapper.toDto(savedProduct));
+        return productMapper.toDto(savedProduct);
     }
 
     @Override
@@ -59,25 +55,11 @@ public class ProductServiceImpl implements ProductService {
         }
 
         Product updatedProduct = productRepository.save(existingProduct);
-        return convertImageUrlToPresigned(productMapper.toDto(updatedProduct));
+        return productMapper.toDto(updatedProduct);
     }
 
     @Override
     public void deleteProduct(Integer id) {
         productRepository.deleteById(id);
-    }
-
-    /**
-     * Convert MinIO object name to presigned URL for image access
-     */
-    private ProductDTO convertImageUrlToPresigned(ProductDTO productDTO) {
-        if (productDTO.getImgUrl() != null && !productDTO.getImgUrl().isEmpty()) {
-            // Only convert if it's not already a full URL
-            if (!productDTO.getImgUrl().startsWith("http")) {
-                String presignedUrl = storageService.getFileUrl(productDTO.getImgUrl(), "");
-                productDTO.setImgUrl(presignedUrl);
-            }
-        }
-        return productDTO;
     }
 }
