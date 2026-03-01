@@ -33,7 +33,8 @@ public class PaymentServiceImpl implements PaymentService {
         // Generate unique IDs
         String momoOrderId = "ORDER_" + orderId + "_" + System.currentTimeMillis();
         String requestId = "REQ_" + System.currentTimeMillis();
-        String amount = order.getTotalAmount().multiply(java.math.BigDecimal.valueOf(100)).toBigInteger().toString();
+        // VND amounts don't need conversion (no subunits like cents)
+        String amount = order.getTotalAmount().toBigInteger().toString();
         String orderInfo = "Payment for Order #" + orderId;
         String extraData = ""; // Can be used to store additional information
 
