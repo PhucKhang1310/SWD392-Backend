@@ -1,7 +1,10 @@
 const express = require("express");
 const router = express.Router();
-const { getHistory, clearHistory, chat } = require("../controllers/chatController");
+const { getHistory, clearHistory, chat, pingDb } = require("../controllers/chatController");
 const { authenticate } = require("../middleware/auth");
+
+// Diagnostics (no auth — remove after confirming server DB access is healthy)
+router.get("/ping-db", pingDb);
 
 // Buyer interact with chat bot endpoints
 router.get("/history", authenticate, getHistory);

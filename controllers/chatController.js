@@ -1,8 +1,16 @@
 const axios = require("axios");
 const Product = require("../models/Product");
 
-const apiKey = "FORBIDDEN_KEY";
-const openaiUrl = "https://openai.taiduc1001.net/v1/chat/completions";
+const apiKey = process.env.OPENAI_API_KEY || "";
+const openaiUrl =
+  process.env.OPENAI_API_URL || "https://openai.taiduc1001.net/v1/chat/completions";
+
+if (!apiKey) {
+  console.warn(
+    "[Chat] WARNING: OPENAI_API_KEY is not set in environment variables. " +
+    "The chatbot will not function until this is configured."
+  );
+}
 
 // Simple in-memory storage mapped by user ID
 const chatHistories = new Map();
@@ -16,16 +24,26 @@ Always include the product price and format currency as VND (₫) nicely when re
 
     try {
         // Fetching top 30 active products for context injection
-        const products = await Product.find({ status: "ACTIVE" }).limit(30).lean();
+        // Note: schema uses `isActive` (Boolean), not `status`. Populate refs for readable names.
+        const products = await Product.find({ isActive: true })
+            .limit(30)
+            .populate("category", "name")
+            .populate("brand", "name")
+            .lean();
         if (products.length > 0) {
             products.forEach(p => {
-                promptStr += `- ${p.name} (Category: ${p.category}) - Price: ${p.price}₫. Features: ${p.description || "N/A"}\n`;
+                const categoryName = p.category?.name || "N/A";
+                const brandName = p.brand?.name || "N/A";
+                promptStr += `- ${p.name} (Category: ${categoryName}, Brand: ${brandName}) - Price: ${p.price}₫. Features: ${p.description || "N/A"}\n`;
             });
         } else {
              promptStr += "No products are currently available in the catalog.\n";
         }
     } catch(err) {
-        console.error("Failed to fetch products for LLM context", err);
+        console.error(
+            "[Chat] Failed to fetch products for LLM context.",
+            `Code: ${err.code || "N/A"} | Message: ${err.message}`
+        );
     }
     return promptStr;
 };
@@ -132,8 +150,27 @@ const callOpenAI = async (history) => {
     }
 }
 
+// GET /api/chat/ping-db  ← diagnostic only, remove after confirming server is healthy
+const pingDb = async (req, res) => {
+    try {
+        const total = await Product.countDocuments({});
+        const active = await Product.countDocuments({ isActive: true });
+        const withStock = await Product.countDocuments({ isActive: true, stock: { $gt: 0 } });
+        res.json({
+            ok: true,
+            totalProducts: total,
+            activeProducts: active,
+            activeWithStock: withStock,
+            chatbotWillSee: active,   // chatbot uses { isActive: true }, no stock filter
+        });
+    } catch (err) {
+        res.status(500).json({ ok: false, error: err.message, code: err.code });
+    }
+};
+
 module.exports = {
    getHistory,
    clearHistory,
-   chat
+   chat,
+   pingDb
 };
