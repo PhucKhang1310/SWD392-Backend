@@ -1,6 +1,6 @@
 const Product = require("../models/Product");
 const Category = require("../models/Category");
-const Brand = require("../models/Brand");
+const Brand = require("../models/brand");
 const Review = require("../models/Review");
 
 // Build a map of productId -> { avgRating, reviewCount } from Review collection
