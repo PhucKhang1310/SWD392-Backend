@@ -7,8 +7,8 @@ on:
   workflow_dispatch:
 
 env:
-  IMAGE_NAME: ghcr.io/taiduc1001/swd392-backend:node-latest
-  CONTAINER_NAME: swd392-backend-node
+  IMAGE_NAME: ghcr.io/taiduc1001/swd392-backend:latest
+  CONTAINER_NAME: swd392-backend
 
 jobs:
   deploy:
@@ -53,7 +53,7 @@ jobs:
             echo ${{ secrets.GHCR_PAT }} | docker login ghcr.io -u taiduc1001 --password-stdin
             docker pull ${{ env.IMAGE_NAME }}
 
-            docker rm -f ${{ env.CONTAINER_NAME }} >/dev/null 2>&1 || true
+            docker rm -f ${{ env.CONTAINER_NAME }} swd392-backend-node swd392-backend-app-1 >/dev/null 2>&1 || true
 
             APP_DIR="$HOME/swd392-backend"
             UPLOAD_DIR="$APP_DIR/uploads"
@@ -61,7 +61,7 @@ jobs:
             mkdir -p "$UPLOAD_DIR"
 
             if [ -f "$ENV_FILE" ]; then
-              docker run -d --name ${{ env.CONTAINER_NAME }} --restart always -p 3000:3000 -v "$UPLOAD_DIR:/app/uploads" --env-file "$ENV_FILE" ${{ env.IMAGE_NAME }}
+              docker run -d --name ${{ env.CONTAINER_NAME }} --restart always -p 8080:8080 -e PORT=8080 -v "$UPLOAD_DIR:/app/uploads" --env-file "$ENV_FILE" ${{ env.IMAGE_NAME }}
             else
-              docker run -d --name ${{ env.CONTAINER_NAME }} --restart always -p 3000:3000 -v "$UPLOAD_DIR:/app/uploads" ${{ env.IMAGE_NAME }}
+              docker run -d --name ${{ env.CONTAINER_NAME }} --restart always -p 8080:8080 -e PORT=8080 -v "$UPLOAD_DIR:/app/uploads" ${{ env.IMAGE_NAME }}
             fi
