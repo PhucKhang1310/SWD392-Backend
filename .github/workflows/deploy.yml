@@ -53,12 +53,17 @@ jobs:
             echo ${{ secrets.GHCR_PAT }} | docker login ghcr.io -u taiduc1001 --password-stdin
             docker pull ${{ env.IMAGE_NAME }}
 
-            docker rm -f ${{ env.CONTAINER_NAME }} swd392-backend-node swd392-backend-app-1 >/dev/null 2>&1 || true
+            docker rm -f ${{ env.CONTAINER_NAME }} swd392-backend-node swd392-backend >/dev/null 2>&1 || true
 
             APP_DIR="$HOME/swd392-backend"
             UPLOAD_DIR="$APP_DIR/uploads"
             ENV_FILE="$APP_DIR/.env"
             mkdir -p "$UPLOAD_DIR"
+
+            OLD_8080_CONTAINERS=$(docker ps -q --filter publish=8080)
+            if [ -n "$OLD_8080_CONTAINERS" ]; then
+              docker rm -f $OLD_8080_CONTAINERS >/dev/null 2>&1 || true
+            fi
 
             if [ -f "$ENV_FILE" ]; then
               docker run -d --name ${{ env.CONTAINER_NAME }} --restart always -p 8080:8080 -e PORT=8080 -v "$UPLOAD_DIR:/app/uploads" --env-file "$ENV_FILE" ${{ env.IMAGE_NAME }}
