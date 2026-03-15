@@ -1,5 +1,8 @@
 package swd392.backend.domain.mapper;
 
+import jakarta.persistence.EntityNotFoundException;
+import lombok.extern.slf4j.Slf4j;
+import org.hibernate.ObjectNotFoundException;
 import org.springframework.stereotype.Component;
 import swd392.backend.domain.dto.OrderDTO;
 import swd392.backend.domain.dto.OrderItemDTO;
@@ -9,6 +12,7 @@ import swd392.backend.jpa.model.OrderItem;
 import java.util.ArrayList;
 import java.util.List;
 
+@Slf4j
 @Component
 public class OrderMapper {
 
@@ -60,8 +64,14 @@ public class OrderMapper {
         }
 
         if (orderItem.getProduct() != null) {
-            dto.setProductId(orderItem.getProduct().getId());
-            dto.setProductName(orderItem.getProduct().getName());
+            try {
+                dto.setProductId(orderItem.getProduct().getId());
+                dto.setProductName(orderItem.getProduct().getName());
+            } catch (ObjectNotFoundException | EntityNotFoundException e) {
+                log.warn("Product not found for order item {}: {}", orderItem.getId(), e.getMessage());
+                dto.setProductId(null);
+                dto.setProductName("[Product Deleted]");
+            }
         }
 
         return dto;

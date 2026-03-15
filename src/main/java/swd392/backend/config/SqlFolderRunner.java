@@ -17,7 +17,8 @@ import java.util.List;
 
 @Slf4j
 @Component
-@Order(2) // runs after CartStatusMigration (which has no @Order, defaulting to lowest priority)
+@Order(2) // runs after CartStatusMigration (which has no @Order, defaulting to lowest
+          // priority)
 @RequiredArgsConstructor
 public class SqlFolderRunner implements ApplicationRunner {
 
@@ -34,10 +35,10 @@ public class SqlFolderRunner implements ApplicationRunner {
             return;
         }
 
-        // Sort alphabetically so execution order is predictable (e.g. 01_users.sql, 02_products.sql)
+        // Sort alphabetically so execution order is predictable (e.g. 01_users.sql,
+        // 02_products.sql)
         Arrays.sort(resources, java.util.Comparator.comparing(
-                r -> r.getFilename() != null ? r.getFilename() : ""
-        ));
+                r -> r.getFilename() != null ? r.getFilename() : ""));
 
         log.info("Found {} SQL file(s) in classpath:sql/ — executing in order:", resources.length);
         for (Resource r : resources) {
@@ -71,19 +72,24 @@ public class SqlFolderRunner implements ApplicationRunner {
         for (String line : content.split("\\r?\\n")) {
             if (line.trim().equalsIgnoreCase("GO")) {
                 String batch = current.toString().trim();
-                if (!batch.isEmpty()) batches.add(batch);
+                if (!batch.isEmpty())
+                    batches.add(batch);
                 current.setLength(0);
             } else {
                 current.append(line).append("\n");
             }
         }
         String last = current.toString().trim();
-        if (!last.isEmpty()) batches.add(last);
+        if (!last.isEmpty())
+            batches.add(last);
 
         int executed = 0, skipped = 0;
         for (String batch : batches) {
             String trimmed = batch.trim();
-            if (trimmed.isEmpty()) { skipped++; continue; }
+            if (trimmed.isEmpty()) {
+                skipped++;
+                continue;
+            }
 
             String upper = trimmed.toUpperCase();
             // Skip non-executable or redundant batches
@@ -95,7 +101,7 @@ public class SqlFolderRunner implements ApplicationRunner {
                     // enforced by the preceding "WITH CHECK ADD" — safe to skip
                     || (upper.startsWith("ALTER TABLE") && upper.contains("CHECK CONSTRAINT") && !upper.contains("ADD"))
                     || (upper.startsWith("/*") && !upper.contains("CREATE") && !upper.contains("INSERT")
-                        && !upper.contains("ALTER") && !upper.contains("DROP") && !upper.contains("IF"))) {
+                            && !upper.contains("ALTER") && !upper.contains("DROP") && !upper.contains("IF"))) {
                 skipped++;
                 continue;
             }
