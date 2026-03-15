@@ -38,40 +38,87 @@ connectDB().catch((error) => {
 var cors = require("cors");
 var app = express();
 
-// CORS: allow FE, MO, and public tunnels (ngrok, Cloudflare). Tunnels use https and mobile may send no origin.
+// ---------------------------------------------------------------------------
+// CORS Configuration
+// ---------------------------------------------------------------------------
+// In DEVELOPMENT  → all origins are accepted (fast iteration, no config needed).
+// In PRODUCTION   → only origins in the allow-list below are accepted.
+//
+// Allow-list sources (checked in order):
+//  1. FRONTEND_URL env var  – comma-separated list, e.g. "https://myapp.com,https://admin.myapp.com"
+//  2. Hard-coded localhost / LAN ports used during local dev
+//  3. Expo Go / React-Native (exp://) and local-network IPs (192.168.x, 10.0.x)
+//  4. Public tunnel services: ngrok, Cloudflare, localtunnel
+//  5. No-origin requests (mobile apps, curl, server-to-server) → always allowed
+// ---------------------------------------------------------------------------
 const isDev = process.env.NODE_ENV !== "production";
+
+// Build explicit allow-list from env var (supports multiple comma-separated URLs)
+const envOrigins = (process.env.FRONTEND_URL || "")
+  .split(",")
+  .map((s) => s.trim())
+  .filter(Boolean);
+
 const allowedOrigins = [
-  process.env.FRONTEND_URL || "http://localhost:5173",
+  ...envOrigins,
+  // Local web dev
+  "http://localhost:3000",
   "http://localhost:5173",
+  "http://127.0.0.1:5173",
+  // Local mobile dev (Expo / React Native)
   "http://localhost:8081",
   "http://127.0.0.1:8081",
+  // Android emulator → host machine
   "http://10.0.2.2:8081",
   "http://10.0.2.2:5000",
 ];
+
+// Detect public tunnel origins (ngrok, Cloudflare Tunnel, localtunnel)
 const isTunnelOrigin = (origin) =>
   typeof origin === "string" &&
-  (origin.startsWith("https://") ||
-    /\.ngrok\.(io|dev|app)$/i.test(origin) ||
+  (/\.ngrok\.(io|dev|app)$/i.test(origin) ||
     /\.trycloudflare\.com$/i.test(origin) ||
-    /\.loca\.lt$/i.test(origin));
-app.use(
-  cors({
-    origin: (origin, cb) => {
-      if (isDev) return cb(null, true);
-      if (!origin) return cb(null, true);
-      if (allowedOrigins.some((o) => origin === o)) return cb(null, true);
-      if (
-        origin.startsWith("exp://") ||
-        origin.startsWith("http://192.168.") ||
-        origin.startsWith("http://10.0.")
-      )
-        return cb(null, true);
-      if (isTunnelOrigin(origin)) return cb(null, true);
-      cb(null, false);
-    },
-    credentials: true,
-  }),
-);
+    /\.loca\.lt$/i.test(origin) ||
+    /\.ngrok-free\.app$/i.test(origin));
+
+// Detect local-network / Expo origins
+const isLocalNetworkOrigin = (origin) =>
+  typeof origin === "string" &&
+  (origin.startsWith("exp://") ||
+    origin.startsWith("http://192.168.") ||
+    origin.startsWith("http://10.0.") ||
+    origin.startsWith("http://172."));
+
+const corsOptions = {
+  origin: (origin, cb) => {
+    // No origin header → mobile app, curl, or server-to-server → allow
+    if (!origin) return cb(null, true);
+    // Development: allow everything
+    if (isDev) return cb(null, true);
+    // Production checks
+    if (allowedOrigins.includes(origin)) return cb(null, true);
+    if (isLocalNetworkOrigin(origin)) return cb(null, true);
+    if (isTunnelOrigin(origin)) return cb(null, true);
+    // Blocked
+    console.warn(`[CORS] Blocked origin: ${origin}`);
+    cb(null, false);
+  },
+  credentials: true, // Allow cookies / Authorization headers
+  methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+  allowedHeaders: [
+    "Content-Type",
+    "Authorization",
+    "X-Requested-With",
+    "Accept",
+    "Origin",
+  ],
+  exposedHeaders: ["Content-Disposition"], // Useful for file downloads
+  optionsSuccessStatus: 204, // Some legacy browsers choke on 204; change to 200 if needed
+};
+
+app.use(cors(corsOptions));
+// Explicitly handle preflight OPTIONS requests for all routes
+app.options("*", cors(corsOptions));
 app.use(logger("dev"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
